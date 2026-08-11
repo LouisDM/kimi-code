@@ -1,4 +1,5 @@
 import { createDecorator } from '#/_base/di/instantiation';
+import type { IDisposable } from '#/_base/di/lifecycle';
 import type { ContextMessage } from '#/agent/contextMemory/types';
 import type { Turn, TurnResult } from '#/agent/loop/loop';
 import type { Hooks } from '#/hooks';
@@ -45,6 +46,21 @@ export interface PromptHandle extends PromptSnapshot {
 export interface PromptQueueSnapshot {
   readonly active: PromptSnapshot | undefined;
   readonly pending: readonly PromptSnapshot[];
+}
+
+export interface PromptReservation extends IDisposable {
+  readonly id: string;
+  submit(message: ContextMessage): Promise<PromptHandle>;
+}
+
+export const promptAdmission = Symbol('promptAdmission');
+
+type PromptAdmissionHook = (promptId?: string) => PromptReservation;
+
+export function reservePrompt(service: IAgentPromptService, promptId?: string): PromptReservation {
+  return (service as IAgentPromptService & { [promptAdmission]: PromptAdmissionHook })[
+    promptAdmission
+  ](promptId);
 }
 
 export interface IAgentPromptService {

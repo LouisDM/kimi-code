@@ -185,6 +185,10 @@ describe('server-v2 /api/v1/debug RPC', () => {
     });
     // Framework plumbing stays out of the listing.
     expect(meta?.methods.map((m) => m.name)).not.toContain('dispose');
+
+    const prompts = byName.get('agentPromptService');
+    expect(prompts?.methods.map((m) => m.name)).toContain('enqueue');
+    expect(prompts?.methods.map((m) => m.name)).not.toContain('reserve');
   });
 
   it('lists sessions via GET', async () => {
@@ -318,6 +322,30 @@ describe('server-v2 /api/v1/debug RPC', () => {
     );
     expect(body.code).toBe(0);
     expect(body.data.turn_id).toBe(0);
+  });
+
+  it('maps a duplicate promptId to 40923 before metadata changes', async () => {
+    const id = await createSession(home as string);
+    await createMainAgent(id);
+    const path = rpc('agent', IAgentRPCService, 'prompt', { sid: id, aid: 'main' });
+
+    const first = await call<{ turn_id: number }>('POST', path, {
+      input: [{ type: 'text', text: 'first prompt' }],
+      promptId: 'submission-1',
+    });
+    expect(first.body.code).toBe(0);
+
+    const duplicate = await call<null>('POST', path, {
+      input: [{ type: 'text', text: 'must not become metadata' }],
+      promptId: 'submission-1',
+    });
+    expect(duplicate.body.code).toBe(40923);
+
+    const metadata = await call<SessionMetaWire>(
+      'POST',
+      rpc('session', ISessionMetadata, 'read', { sid: id }),
+    );
+    expect(metadata.body.data.lastPrompt).toBe('first prompt');
   });
 
   it('rejects disabledTools before bind without mutating prompt metadata', async () => {

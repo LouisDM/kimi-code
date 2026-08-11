@@ -21,7 +21,7 @@
 // owning model offloads inline media to blob storage), cross-reducers
 // (foreign models that also reduce this record on dispatch and replay).
 
-// Index (48 record types)
+// Index (49 record types)
 //   config.update                      profile               persisted  src/agent/profile/profileOps.ts
 //   context.append_loop_event          contextMemory         persisted  src/agent/contextMemory/contextOps.ts
 //   context.append_message             contextMemory         persisted  src/agent/contextMemory/contextOps.ts
@@ -52,6 +52,7 @@
 //   plan_mode.exit                     plan                  persisted  src/features/plan/planOps.ts
 //   plan.revision                      plan                  persisted  src/features/plan/planOps.ts
 //   profile.bind                       profile               persisted  src/agent/profile/profileOps.ts
+//   prompt.accepted                    promptAdmission       persisted  src/agent/prompt/promptOps.ts
 //   skill.activate                     skill                 transient  src/agent/skill/skillOps.ts
 //   swarm_mode.enter                   swarm                 persisted  src/agent/swarm/swarmOps.ts
 //   swarm_mode.exit                    swarm                 persisted  src/agent/swarm/swarmOps.ts
@@ -472,6 +473,15 @@ interface ProfileBindPayload {
 }
 
 /**
+ * model: promptAdmission · persisted
+ * owner: src/agent/prompt/promptOps.ts
+ */
+interface PromptAcceptedPayload {
+  _name: 'prompt.accepted';
+  promptId: string;
+}
+
+/**
  * model: skill · toEvent
  * owner: src/agent/skill/skillOps.ts
  */
@@ -747,6 +757,7 @@ interface WirePayloadMap {
   "plan_mode.exit": PlanModeExitPayload;
   "plan.revision": PlanRevisionPayload;
   "profile.bind": ProfileBindPayload;
+  "prompt.accepted": PromptAcceptedPayload;
   "skill.activate": SkillActivatePayload;
   "swarm_mode.enter": SwarmModeEnterPayload;
   "swarm_mode.exit": SwarmModeExitPayload;
