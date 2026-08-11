@@ -89,6 +89,7 @@ import {
   IPluginService,
   ISessionContext,
   ISessionIndex,
+  ISessionMediaStore,
   ISessionMetadata,
   ISessionSkillCatalog,
   ISkillDiscovery,
@@ -119,6 +120,7 @@ import { z } from 'zod';
 import { errEnvelope, okEnvelope } from '../envelope';
 import {
   assertPromptFileRefs,
+  assertPromptSessionMediaRefs,
   contentToCoreParts,
   resolvePromptMediaFiles,
   type PromptMediaPreparation,
@@ -335,6 +337,10 @@ export function registerSkillsRoutes(app: SkillsRouteHost, core: Scope): void {
             );
           }
           await assertPromptFileRefs(attachments, core.accessor.get(IFileService));
+          await assertPromptSessionMediaRefs(
+            attachments,
+            resolved.handle.accessor.get(ISessionMediaStore),
+          );
           const telemetry = core.accessor.get(ITelemetryService).withContext({ sessionId: session_id });
           const sessionDir = resolved.handle.accessor.get(ISessionContext).sessionDir;
           preparedMedia = await resolvePromptMediaFiles(
@@ -354,6 +360,8 @@ export function registerSkillsRoutes(app: SkillsRouteHost, core: Scope): void {
           .get(IAgentSkillService)
           .activate({ name: parsed.id, args: req.body.args, content: attachmentParts });
         activated = true;
+        await preparedMedia?.discard();
+        preparedMedia = undefined;
         // Keep the easy-title behavior of the native RPC / TUI path: a first
         // `/<skill>` message titles the session (same as routes/prompts.ts).
         await applyPromptMetadataUpdate(

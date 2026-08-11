@@ -77,6 +77,7 @@ const V2_RECORD_TYPES: ReadonlySet<string> = new Set([
   'plan.revision',
   'interruptionReminder.recorded',
   'turn.ended',
+  'prompt.accepted',
 ]);
 
 describe('v1 wire vocabulary', () => {
