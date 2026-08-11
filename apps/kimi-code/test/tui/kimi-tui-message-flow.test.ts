@@ -497,7 +497,6 @@ afterEach(async () => {
   } else {
     process.env['EDITOR'] = originalEditor;
   }
-  vi.unstubAllEnvs();
 });
 
 describe('KimiTUI message flow', () => {
@@ -5520,7 +5519,6 @@ command = "vim"
   });
 
   it('shows a quota note after installing a quota-consuming official plugin', async () => {
-    vi.stubEnv('KIMI_CODE_LEGACY_FLAG', '1');
     const session = makeSession({
       installPlugin: vi.fn(async () => ({
         id: 'kimi-datasource',
@@ -5547,37 +5545,6 @@ command = "vim"
       const transcript = stripSgr(renderTranscript(driver));
       expect(transcript).toContain('Run /new or /reload to apply plugin changes.');
       expect(transcript).toContain('Note: This plugin consumes your quota.');
-    });
-  });
-
-  it('shows the apply-immediately hint after installing a plugin on the v2 engine', async () => {
-    vi.stubEnv('KIMI_CODE_LEGACY_FLAG', '');
-    const session = makeSession({
-      installPlugin: vi.fn(async () => ({
-        id: 'demo',
-        displayName: 'Demo',
-        version: '1.0.0',
-        enabled: true,
-        state: 'ok',
-        skillCount: 0,
-        mcpServerCount: 1,
-        enabledMcpServerCount: 1,
-        hasErrors: false,
-        source: 'zip-url',
-        originalSource: 'https://code.kimi.com/kimi-code/plugins/official/demo.zip',
-      })),
-    });
-    const { driver } = await makeDriver(session);
-
-    // Official sources skip the trust prompt, so the install runs immediately.
-    driver.handleUserInput(
-      '/plugins install https://code.kimi.com/kimi-code/plugins/official/demo.zip',
-    );
-
-    await vi.waitFor(() => {
-      const transcript = stripSgr(renderTranscript(driver));
-      expect(transcript).toContain('Plugin changes apply immediately.');
-      expect(transcript).not.toContain('Run /new or /reload to apply plugin changes.');
     });
   });
 
@@ -5641,7 +5608,6 @@ command = "vim"
   });
 
   it('loads a local plugin marketplace file and installs from it', async () => {
-    vi.stubEnv('KIMI_CODE_LEGACY_FLAG', '1');
     const marketplaceDir = await makeTempHome();
     const marketplacePath = join(marketplaceDir, 'marketplace.json');
     await writeFile(

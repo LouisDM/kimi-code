@@ -373,6 +373,7 @@ describe('AgentLifecycleService', () => {
         log: noopLog,
         oauthService: new McpOAuthService({ store: createMcpOAuthStore(atomicDocsStore) }),
       }),
+      isBaselineServer: () => true,
     } satisfies ISessionMcpHandle);
     stopAllOnExit = vi.fn(async () => []);
     ix.stub(IAgentTaskService, {
@@ -693,6 +694,7 @@ describe('AgentLifecycleService', () => {
       _serviceBrand: undefined,
       ready,
       connectionManager: new McpConnectionManager({ log: noopLog }),
+      isBaselineServer: () => true,
     } satisfies ISessionMcpHandle);
 
     const svc = ix.get(IAgentLifecycleService);

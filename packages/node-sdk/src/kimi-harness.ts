@@ -20,6 +20,7 @@ import type {
   FileMeta,
   ForkSessionInput,
   GetConfigOptions,
+  GlobalMcpServerAuthStatus,
   KimiConfig,
   KimiConfigPatch,
   KimiHostIdentity,
@@ -407,6 +408,10 @@ export class KimiHarness {
   /** User-global MCP entries from `<KIMI_CODE_HOME>/mcp.json` only. */
   async listMcpServers(): Promise<readonly McpServerConfig[]> {
     return this.rpc.listGlobalMcpServers();
+  }
+
+  async listMcpServerAuthStatuses(): Promise<readonly GlobalMcpServerAuthStatus[]> {
+    return this.rpc.listGlobalMcpServerAuthStatuses();
   }
 
   async addMcpServer(server: McpServerConfig): Promise<readonly McpServerConfig[]> {
